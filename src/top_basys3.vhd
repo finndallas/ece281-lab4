@@ -90,7 +90,7 @@ w_elevator_reset <= btnR OR btnU;
 	--generic map	
 	
 	   clock_divider_TDM_inst : clock_divider
-	   	generic map (k_div => 250000000)
+	   	generic map (k_div => 208333)
 
 	     port map(
 	     --in
@@ -101,7 +101,7 @@ w_elevator_reset <= btnR OR btnU;
 	     );
 	
 	   clock_divider_inst : clock_divider
-	   generic map (k_div => 208333) --ranbdolph told me this speed
+	   generic map (k_div => 250000000) --ranbdolph told me this speed
 	     port map(
 	     --in
 	     i_clk => clk,
