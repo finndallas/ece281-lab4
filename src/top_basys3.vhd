@@ -24,9 +24,16 @@ end top_basys3;
 
 architecture top_basys3_arch of top_basys3 is
 
-    -- signal declarations
+    -- signal 
+    signal w_clk : std_logic;
+    signal w_clk_TDM : std_logic;
+    signal w_clk_reset : std_logic;
+    signal w_elevator_reset  : std_logic;
+    signal w_1stelevator : std_logic_vector (3 downto 0);
+    signal w_2ndelevator : std_logic_vector (3 downto 0);
+    signal w_data : std_logic_vector (3 downto 0);
     
-  
+
 	-- component declarations
     component sevenseg_decoder is
         port (
@@ -68,9 +75,82 @@ architecture top_basys3_arch of top_basys3 is
         );
     end component clock_divider;
 	
+	
+	
+	
 begin
+
+--randolph show me dis for the OR gate
+w_clk_reset <= btnU OR btnU;
+w_elevator_reset <= btnR OR btnU;
+
+
 	-- PORT MAPS ----------------------------------------
-    	
+	
+	--generic map	
+	
+	   clock_divider_TDM_inst : clock_divider
+	   	generic map (k_div => 250000000)
+
+	     port map(
+	     --in
+	     i_clk => clk,
+	     --out
+	     i_reset => w_clk_reset,
+	     o_clk => w_clk_TDM
+	     );
+	
+	   clock_divider_inst : clock_divider
+	   generic map (k_div => 208333) --ranbdolph told me this speed
+	     port map(
+	     --in
+	     i_clk => clk,
+	     --out
+	     i_reset => w_clk_reset,
+	     o_clk => w_clk
+	     );
+	
+       elevator_controller_inst :  elevator_controller_fsm
+          port map(
+          --in
+            i_clk => w_clk,
+            i_reset => w_elevator_reset,
+            is_stopped => sw(0),
+            go_up_down => sw(1),
+            --out
+            o_floor => w_1stelevator
+            );
+            
+		 elevator_controller_2_inst :  elevator_controller_fsm
+          port map(
+          --in
+            i_clk => w_clk,
+            i_reset => w_elevator_reset,
+            is_stopped => sw(14),
+            go_up_down => sw(15),
+            --out
+            o_floor => w_2ndelevator
+            
+            );
+            
+		sevenseg_decoder_inst : sevenseg_decoder
+		  port map(
+		  i_Hex => w_data,
+		  o_seg_n => seg
+		  );
+		  
+		  TDM4_inst : TDM4
+        Port map ( 
+            i_clk => w_clk_TDM,
+            i_reset => btnU,
+            i_D3 => "1111",
+            i_D2 => w_2ndelevator,
+            i_D1 => "1111",
+            i_D0 => w_1stelevator,
+            o_data => w_data,
+            o_sel => an
+	   );
+            
 	
 	-- CONCURRENT STATEMENTS ----------------------------
 	
